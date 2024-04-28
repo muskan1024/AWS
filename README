@@ -1,0 +1,1 @@
+docker container run -d --name pg2 -e POSTGRES_PASSWORD="pwd" --health-cmd="pg_isready -U postgres || exit" postgres
