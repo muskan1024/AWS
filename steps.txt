@@ -1,0 +1,245 @@
+##lifecycle operation 
+
+1: docker install and status check 
+2: run sample images
+    #docker run hello-world
+    # docker run centos
+    # docker run --name myweb1 -p 7089:80 -d nginx
+    # docker ps
+    # docker ps -a 
+
+3: after installing nginx open new tab publicIP:7089
+4: perform lifecycle operations on docker images
+    # docker start containerID
+    # docker top containerID
+    # docker stats containerID
+    # docker pause containerID
+    # docker unpause containerID
+    # docker stop containerID
+    # docker rm containerID
+    # history
+
+-----------------------------------------------------
+
+##create own image and push to dockerhub 
+
+1. Launch ec2 instance and install docker 
+2. create Dockerfile (sudo nano Dockerfile)
+    #This is sample image
+    FROM ubuntu
+    MAINTAINER shaikhmuskan1024@gmail.com
+    RUN apt-get update -y
+    RUN apt-get install nginx -y
+    CMD ["echo", "Image Created"]
+
+3.build the image
+    #docker build -t imagename:tagname
+    docker build -t myimage:latest
+4.create repo in docker hub 
+5.add tag to image
+    # docker tag myimage:latest muskanshaikh10/secondpractical
+6.login docker in terminal 
+    docker login 
+7. push image to docker hub
+    docker push muskanshaikh10/secondpractical
+8.Check in dockerhub
+9.check image locally dlt them and 
+10. pull your image from dockerhub
+
+--------------------------------------------------
+
+##pull jenkins image and expose data ports and control ports
+
+1.docker install 
+2.pull jenkins image
+    docker pull jenkins/jenkins
+3. run jenkins 
+    #docker run -p 8080:8080 -p 50000:50000 jenkins/jenkins
+4.Expose jenkins using data port 
+    EC2 public ip:data port(8080)
+5.login to jenkins dashboard
+6.Expose jenkins using control port 
+    EC2 public ip:control port(50000)
+
+----------------------------------------------------
+
+##create private registry on local host and push any image in private registry
+
+1.docker install 
+2.pull registry image from docker hub 
+    docker pull registry or registry:latest
+3.Run the docker
+    #docker run -d -p 5000:5000 –name registry registry:latest
+4.Pull any image 
+    #docker pull centos
+5.Tag the image centos to private registry
+    #sudo docker tag imageid localhost:5000/centos
+6.Push the image to the private registry
+    #sudo docker push localhost:5000/centos
+7.remove previous centos images 
+    #docker rmi –force imageid(centos)
+8.Pull the image from the private registry
+    #docker pull localhost:5000/centos
+
+-------------------------------------------------
+
+Implementing AWS ECS (Elastic Container Service) and Fargate deploying and managing containerized applications.
+
+ecs-ec2
+1.Browse ECS and create cluster
+    clusterName
+
+    Infra:
+        EC2 instance
+            ASG: create new ASG 
+            On demand
+            Os: amazon Linux 2
+            auto assign public ip: default
+
+    create
+            
+2.Create new task defination
+    select accordingly
+    task size: 
+        cpu: 1vcpu
+        memory: 3gb
+    task role:
+        ecsTaskExecutionRole
+    default
+
+    container1: 
+        name: httpd
+        image url : httpd:2.4
+        essential container: yes
+    port mappings:
+        container port: 80
+        protocol: TCP
+        port name: httpd
+        app protocol: HTTP
+    resource allocation :
+        cpu: 1
+        gpu: 
+        memory hard limit: 1
+        memory soft limit: 
+
+    default
+    log collection : uncheck
+
+after succesfull creting task select task and click deploy and create Service
+        compute option: 
+            launch type
+            ec2
+        deployment config:
+            service name: httpd
+            service type: replica
+            desired task: 1
+        rest optional
+
+go to ec2 and connect through ssh 
+
+docker ps -a
+
+
+ecs-Fargate
+1.create cluster
+    cluster name- Fargate
+
+                            create
+2.create task
+    task size:
+        CPU: .25vcpu
+        memory: .5GB
+
+    container1 
+        name: httpd
+        image url : httpd:2.4
+3.deploy task and create service
+    compute option: launch type
+        Fargate
+    service name: httpd
+    replica
+    networking: 
+        on public ip option
+
+click on your cluster in task go to the task and copy and paste public ip in new tab
+
+----------------------------------------------
+
+Install Docker Compose package on docker then create and run multi-container applications using Docker Compose.
+
+1.docker install 
+2.download and install the compose cli plugin 
+    curl -SL https://github.com/docker/compose/releases/download/v2.24.6/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose
+    
+    -Apply executable permissions to the binary:
+        #chmod +x /usr/local/bin/docker-compose
+    -Test the installation.
+        #docker compose version
+3.create a directory
+    mkdir composetest
+    cd composetest
+4.create file in it app.py requirements.txt Dockerfile compose.yml and paste the codes 
+    sudo nano app.py
+
+8. docker compose up
+    #docker compose up
+9.Check if the application is running
+    publicIP:8000
+
+---------------------------------------------------------
+
+Build Image with two dependencies (Flask,Reddis) and create 1 Manager and 3 Worker node container with Docker Swarm
+
+create 2 instances one manager and another for worker node
+1.install docker
+2.Create a new swarm in manager node 
+    #docker swarm init 
+    #docker info
+3.join worker nodes to swarm in the manager node
+4.In the manager node deploy services to the swarm
+    #docker service create alpine ping www.google.com
+    #docker service create --replicas 5 alpine ping www.google.com
+5.list running services
+    #docker service ls
+
+----------------------------------------------------------
+
+Build Image with two dependencies (Flask, Reddis) and create container with 5 replicas with docker stack
+
+create 3 instance 1 manager 2 worker
+
+1.launch instance and install docker
+2.run the manager node in swarm mode
+    docker swarm init
+3.join worker nodes 
+4.create a directory 
+    mkdir demoproj
+    cd demoproj
+5.create file app.py requirements.txt Dockerfile docker-compose.yml
+6.build the image and push it to docker hub(create a new repo in dockerhub)
+    #docker build -t web_app
+    #docker tag web_app:latest muskanshaikh/web_app:1.0
+    #docker images
+    #docker login
+    #docker push muskanshaikh10/web_app:1.0
+7.Deploy the stack to the swarm and check it:
+    #docker stack deploy –help
+    Create the stack with docker stack deploy:
+    #docker stack deploy -c dokcer-compose.yml web_app
+    #docker node ls
+    #docker container ls
+    #docker service ls
+8.Check if the application is running
+    publicIP:4000
+
+---------------------------------------------------------------------------
+
+Implementing Docker Health Checks for PostgreSQL Database in a Containerized Environment
+
+1.install docker
+2.Make a directory and execute the command to run a postgresSQL database container and setup health check on it
+    #mkdir dockerhc
+    # cd dockerhc
+    #docker container run -d --name pg2 -e POSTGRES_PASSWORD="pwd" --health-cmd="pg_isready -U postgres || exit" postgres
+3.Check the list of containers to see the health of the container
+    #docker ps -a
