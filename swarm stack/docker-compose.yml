@@ -2,18 +2,19 @@ version: "3"
 services:
   web:
   #image: dockerhubusername/repo:tag
-    image: muskanshaikh10/web_app:1.0
+    image: "muskanshaikh10/web_app:1.0"
 deploy:
   replicas: 5
   resources:
     limits:
       cpus: "0.1"
       memory: 50M
-  restart_policy: 
-    condition: on_failure
+      restart: on-failure
+      networks:
+        - webnet
 ports:
-  -"4000:80"
+  - "4000:80"
 networks:
-  -webnet
+  - webnet
 networks:
   webnet:
